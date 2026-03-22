@@ -1,0 +1,15 @@
+{
+  "name": "versedrop",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd api && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "install:all": "cd api && npm install && cd ../web && npm install",
+    "start": "concurrently \"npm run dev:api\" \"npm run dev:web\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
