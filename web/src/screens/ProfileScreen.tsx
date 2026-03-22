@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useAppStore } from '../store/appStore';
 import { fetchUserProfile } from '../lib/api';
 
 interface UserStats {
@@ -21,6 +22,8 @@ function getBadges(stats: UserStats) {
 
 export default function ProfileScreen() {
   const userToken = useAuthStore((s) => s.userToken);
+  const theme = useAppStore((s) => s.theme);
+  const toggleTheme = useAppStore((s) => s.toggleTheme);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +53,16 @@ export default function ProfileScreen() {
           <div className="profile-avatar">VD</div>
           <div className="profile-name">Anonymous Explorer</div>
           <div className="profile-token">{userToken.slice(0, 8)}...</div>
+        </div>
+
+        {/* Theme Toggle */}
+        <div className="theme-toggle-row">
+          <span className="theme-toggle-label">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+          <button
+            className={`theme-toggle-pill ${theme === 'dark' ? 'active' : ''}`}
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          />
         </div>
 
         {/* Stats Grid */}

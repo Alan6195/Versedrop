@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAppStore } from '../store/appStore';
 
 interface Props {
   onSet: (lat: number, lng: number) => void;
@@ -53,14 +54,35 @@ export default function LocationSetter({ onSet, onClose }: Props) {
   };
 
   const handleUseDevice = () => {
-    if (!navigator.geolocation) {
-      setError('Geolocation not available');
+    // First try to use the location the app already has
+    const existing = useAppStore.getState().userLocation;
+    if (existing) {
+      onSet(existing.lat, existing.lng);
       return;
     }
+
+    if (!navigator.geolocation) {
+      setError('Geolocation not available on this browser');
+      return;
+    }
+
+    setSearching(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => onSet(pos.coords.latitude, pos.coords.longitude),
-      () => setError('Location access denied'),
-      { enableHighAccuracy: true }
+      (pos) => {
+        setSearching(false);
+        onSet(pos.coords.latitude, pos.coords.longitude);
+      },
+      (err) => {
+        setSearching(false);
+        if (err.code === 1) {
+          setError('Location permission denied. Try searching an address or clicking a preset location instead.');
+        } else if (err.code === 2) {
+          setError('Location unavailable. Try searching an address instead.');
+        } else {
+          setError('Location request timed out. Try an address or preset.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
     );
   };
 

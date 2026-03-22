@@ -7,6 +7,7 @@ import LocationSetter from '../components/LocationSetter';
 
 const PICKUP_RANGE = 50;
 const DARK_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const LIGHT_TILES = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
 const VOTD_VERSES = [
   { ref: 'Psalm 118:24', text: 'This is the day which the LORD hath made; we will rejoice and be glad in it.' },
@@ -37,6 +38,7 @@ export default function MapScreen() {
   const markersRef = useRef<L.Marker[]>([]);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const radiusCircleRef = useRef<L.Circle | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [showVotd, setShowVotd] = useState(true);
   const [showLocationSetter, setShowLocationSetter] = useState(false);
@@ -47,6 +49,7 @@ export default function MapScreen() {
   const nearbyDrops = useAppStore((s) => s.nearbyDrops);
   const selectedDrop = useAppStore((s) => s.selectedDrop);
   const showComposer = useAppStore((s) => s.showComposer);
+  const theme = useAppStore((s) => s.theme);
   const setUserLocation = useAppStore((s) => s.setUserLocation);
   const setNearbyDrops = useAppStore((s) => s.setNearbyDrops);
   const setSelectedDrop = useAppStore((s) => s.setSelectedDrop);
@@ -68,7 +71,8 @@ export default function MapScreen() {
       minZoom: 3,
     });
 
-    L.tileLayer(DARK_TILES, {
+    const initialTiles = useAppStore.getState().theme === 'light' ? LIGHT_TILES : DARK_TILES;
+    tileLayerRef.current = L.tileLayer(initialTiles, {
       attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
       maxZoom: 19,
     }).addTo(map);
@@ -86,11 +90,19 @@ export default function MapScreen() {
     setMapReady(true);
 
     return () => {
+      tileLayerRef.current = null;
       map.remove();
       mapRef.current = null;
       setMapReady(false);
     };
   }, []);
+
+  // Swap tile layer when theme changes
+  useEffect(() => {
+    if (!mapRef.current || !tileLayerRef.current) return;
+    const tiles = theme === 'light' ? LIGHT_TILES : DARK_TILES;
+    tileLayerRef.current.setUrl(tiles);
+  }, [theme]);
 
   // Center map + add user marker
   useEffect(() => {

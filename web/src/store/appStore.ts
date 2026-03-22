@@ -21,11 +21,16 @@ export interface Drop {
   created_at: string;
 }
 
-export type Tab = 'map' | 'library' | 'profile';
+export type Tab = 'map' | 'dashboard' | 'library' | 'profile';
+
+export type Theme = 'dark' | 'light';
 
 interface AppStore {
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
+
+  theme: Theme;
+  toggleTheme: () => void;
 
   nearbyDrops: Drop[];
   setNearbyDrops: (drops: Drop[]) => void;
@@ -45,9 +50,29 @@ interface AppStore {
   updateDrop: (dropId: string, updates: Partial<Drop>) => void;
 }
 
+const getInitialTheme = (): Theme => {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('versedrop_theme') as Theme | null;
+    if (stored === 'light' || stored === 'dark') {
+      document.documentElement.setAttribute('data-theme', stored);
+      return stored;
+    }
+  }
+  return 'dark';
+};
+
 export const useAppStore = create<AppStore>((set) => ({
   activeTab: 'map',
   setActiveTab: (tab) => set({ activeTab: tab }),
+
+  theme: getInitialTheme(),
+  toggleTheme: () =>
+    set((state) => {
+      const next: Theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('versedrop_theme', next);
+      return { theme: next };
+    }),
 
   nearbyDrops: [],
   setNearbyDrops: (drops) => set({ nearbyDrops: drops }),

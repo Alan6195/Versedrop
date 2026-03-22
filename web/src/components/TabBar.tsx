@@ -18,6 +18,15 @@ const LibraryIcon = () => (
   </svg>
 );
 
+const DashboardIcon = () => (
+  <svg viewBox="0 0 24 24">
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
+  </svg>
+);
+
 const ProfileIcon = () => (
   <svg viewBox="0 0 24 24">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -27,12 +36,14 @@ const ProfileIcon = () => (
 
 const icons: Record<Tab, React.FC> = {
   map: MapIcon,
+  dashboard: DashboardIcon,
   library: LibraryIcon,
   profile: ProfileIcon,
 };
 
 const labels: Record<Tab, string> = {
   map: 'Map',
+  dashboard: 'Dashboard',
   library: 'Library',
   profile: 'Profile',
 };
@@ -43,7 +54,7 @@ export default function TabBar() {
 
   return (
     <div className="tab-bar">
-      {(['map', 'library', 'profile'] as Tab[]).map((tab) => {
+      {(['map', 'dashboard', 'library', 'profile'] as Tab[]).map((tab) => {
         const Icon = icons[tab];
         return (
           <button
